@@ -6,7 +6,7 @@ import Home from '@/pages/Home'
 import Login from '@/pages/Login'
 import Register from '@/pages/Register'
 import Search from '@/pages/Search'
-// 先把vueRouter原型对象上的push，先保存一份
+// 先把vueRouter原型对象上的push，replace先保存一份
 let originPush=VueRouter.prototype.push;
 let originReplace=VueRouter.prototype.replace;
 //重写push|replace方法
@@ -67,8 +67,14 @@ export default new VueRouter({
             },
             name: 'search',
             // 路由组件能不能传递props数据？能
-            // 布尔值写法 ：params:true
+            // 1.布尔值写法 ：params:true 只能传递params参数
             props: true,
+            // 2.对象写法 额外的给路由传递一些props
+            // props:{a:1,b:2}
+            // 函数式写法：可以params 参数，query参数，通过props传递给路由组件
+           /* props:($route)=>{
+                return {keyword:$route.params.keyword,k:$route.query.k}
+            }*/
         },
         {
             path: '*',
