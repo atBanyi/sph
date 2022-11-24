@@ -48,38 +48,14 @@ export default {
   name: "Header",
   methods: {
     goSearch() {
-      // 编程式路由导航
-      // 第一种传递参数:字符串
-      // this.$router.push('./search/'+this.keword+"?k="+this.keword.toUpperCase())
-
-      // 路由传递参数
-      // 第二种模板字符串
-      //this.$router.push(`/search/${this.keword}?k=${this.keword.toUpperCase()}`)
-
-      // 第三种对象写法 得用name传，不能用path 否则params 会被忽略
-      const result = this.$router.push({
-            name: "search",
-            params: {keyword: this.keword},
-            query: {k: this.keword.toUpperCase()},
-
-          },
-         /* // 解决控制台报错 Uncaught (in promise) NavigationDuplicated: Avoided redundant navigation to current location: "/search/qwe?k=QWE".
-          // 但是该方法治标不治本
-          // 成功的回调
-          () => {
-
-          },
-          // 失败的回调函数
-          () => {
-
-          }*/
-      );
-      console.log(result)
-      console.log(this)
-      // 路由配置中，增加 props 字段，并将值 设置为 true
-
-    }
-  },
+      //如果有query参数也带过去
+      if (this.$route.query){
+       let location ={name: "search", params: {keyword: this.keword||undefined}};
+         location.query=this.$route.query;
+         this.$router.push(location);
+        }
+      }
+    },
   data() {
     return {
       keword: '',

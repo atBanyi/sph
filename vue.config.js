@@ -4,6 +4,9 @@ module.exports = defineConfig({
   transpileDependencies: true,
   lintOnSave:false,
   devServer:{
+    client: {
+      webSocketURL: 'ws://0.0.0.0:8080/ws',
+    },
     // 代理配置
     proxy: {
       // 这里的api 表示如果我们的请求地址有/api的时候,就出触发代理机制
@@ -15,6 +18,7 @@ module.exports = defineConfig({
           '/api': '' // 假设我们想把 localhost:8888/api/login 变成www.baidu.com/login 就需要这么做
         },*/
       },
+
     }
   }
 })

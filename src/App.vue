@@ -19,7 +19,12 @@ export default {
     Footer,
     Header
   },
-
+mounted() {
+    // 派发一个action||获取商品分类的三级联动数据
+  // 1. 挂载完毕的生命周期的钩子，当三级联动组件挂载到页面上时向Vuex发送数据
+  //  通知Vuex发送请求，获取数据存储于home仓库中
+  this.$store.dispatch('home/categoryList')
+}
 }
 </script>
 
