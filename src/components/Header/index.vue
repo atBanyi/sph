@@ -60,6 +60,15 @@ export default {
     return {
       keword: '',
     }
+  },
+  mounted() {
+  //  通知全局事件总线清除关键字
+    this.$bus.$on('clear',()=>{
+      this.keword='';
+    })
+  },
+  beforeDestroy() {
+
   }
 }
 </script>

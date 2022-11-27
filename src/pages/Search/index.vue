@@ -12,39 +12,44 @@
             </li>
           </ul>
           <ul class="fl sui-tag">
-            <li class="with-x">手机</li>
-            <li class="with-x">iphone<i>×</i></li>
-            <li class="with-x">华为<i>×</i></li>
-            <li class="with-x">OPPO<i>×</i></li>
+            <!-- 分类的面包屑-->
+            <li class="with-x" v-if="searchParams.categoryName">{{ searchParams.categoryName }}<i
+                @click="removeCategoryName">x</i></li>
+            <!--关键字的面包屑   -->
+            <li class="with-x" v-if="searchParams.keyword">{{ searchParams.keyword }}<i
+                @click="removeKeyword">x</i></li>
+            <!-- 品牌的面包屑-->
+            <li class="with-x" v-if="searchParams.trademark">{{ searchParams.trademark.split(":")[0] }}<i
+                @click="removetradeMark()">x</i></li>
+            <!--平台的售卖的属性值展示-->
+            <li class="with-x" v-for="(attrValue,index) in searchParams.props" :key="index">{{
+                attrValue.split(":")[1]
+              }}<i
+                  @click="removeAttr(index)">x</i></li>
           </ul>
         </div>
 
         <!--selector-->
-        <SearchSelector/>
+        <SearchSelector @trademarkInfo="trademarkInfo" @attrInfo="attrInfo"/>
 
         <!--details-->
         <div class="details clearfix">
           <div class="sui-navbar">
             <div class="navbar-inner filter">
-              <!--价格的结构-->
+              <!--排序的解构-->
               <ul class="sui-nav">
-                <li class="active">
-                  <a href="#">综合</a>
+                <li :class="{active:isOne}" @click="changeOrder('1')">
+                  <a>综合
+                    <span v-show="isOne"
+                          class="iconfont"
+                          :class="{'icon-direction-down':isAsc,'icon-direction-up':isDesc}"></span>
+                  </a>
                 </li>
-                <li>
-                  <a href="#">销量</a>
-                </li>
-                <li>
-                  <a href="#">新品</a>
-                </li>
-                <li>
-                  <a href="#">评价</a>
-                </li>
-                <li>
-                  <a href="#">价格⬆</a>
-                </li>
-                <li>
-                  <a href="#">价格⬇</a>
+                <li :class="{active:isTwo}" @click="changeOrder('2')">
+                  <a>价格
+                    <span v-show="isTwo" class="iconfont"
+                          :class="{'icon-direction-down':isAsc,'icon-direction-up':isDesc}"></span>
+                  </a>
                 </li>
               </ul>
             </div>
@@ -58,8 +63,10 @@
               >
                 <div class="list-wrap">
                   <div class="p-img">
-                    <a href="item.html" target="_blank">
-                      <img :src="good.defaultImg"/></a>
+                    <!-- 跳转记得带id-->
+                    <router-link :to="`/detail/${good.id}`">
+                      <img :src="good.defaultImg"/>
+                    </router-link>
                   </div>
                   <div class="price">
                     <strong>
@@ -68,48 +75,27 @@
                     </strong>
                   </div>
                   <div class="attr">
-                    <a target="_blank" href="item.html"
-                       title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】">{{ good.title }}</a>
+                    <router-link :to="`/detail/${good.id}`"
+                                 title="促销信息，下单即赠送三个月CIBN视频会员卡！【小米电视新品4A 58 火爆预约中】">{{ good.title }}
+                    </router-link>
                   </div>
                   <div class="commit">
                     <i class="command">已有<span>2000</span>人评价</i>
                   </div>
                   <div class="operate">
-                    <a href="success-cart.html" target="_blank" class="sui-btn btn-bordered btn-danger">加入购物车</a>
+                    <router-link :to="`/detail/${good.id}`" class="sui-btn btn-bordered btn-danger">
+                      加入购物车
+                    </router-link>
                     <a href="javascript:void(0);" class="sui-btn btn-bordered">收藏</a>
                   </div>
                 </div>
               </li>
             </ul>
           </div>
+          <!--分页器-->
           <div class="fr page">
-            <div class="sui-pagination clearfix">
-              <ul>
-                <li class="prev disabled">
-                  <a href="#">«上一页</a>
-                </li>
-                <li class="active">
-                  <a href="#">1</a>
-                </li>
-                <li>
-                  <a href="#">2</a>
-                </li>
-                <li>
-                  <a href="#">3</a>
-                </li>
-                <li>
-                  <a href="#">4</a>
-                </li>
-                <li>
-                  <a href="#">5</a>
-                </li>
-                <li class="dotted"><span>...</span></li>
-                <li class="next">
-                  <a href="#">下一页»</a>
-                </li>
-              </ul>
-              <div><span>共10页&nbsp;</span></div>
-            </div>
+            <Pagination :pageNo="searchParams.pageNo" :pageSize="searchParams.pageSize" :total="total" :continues="5"
+                        @getPageNo="getPageNo"/>
           </div>
         </div>
       </div>
@@ -119,7 +105,8 @@
 
 <script>
 import SearchSelector from './SearchSelector/SearchSelector'
-import {mapGetters} from "vuex";
+import {mapGetters, mapState} from "vuex";
+import Pagination from "@/components/Pagination";
 
 export default {
   name: 'Search',
@@ -137,12 +124,12 @@ export default {
         "categoryName": "",
         // 关键字
         "keyword": "",
-        // 排序
-        "order": "",
+        // 排序 初始应该是综合|降序
+        "order": "1:desc",
         // 代表当前是第几页
         "pageNo": 1,
         // 每一个页面展示的个数
-        "pageSize": 10,
+        "pageSize": 3,
         // 平台售卖属性操作
         "props": [],
         // 品牌
@@ -172,15 +159,135 @@ export default {
     // 请求封装为函数，在需要调用的时候去调用
     getData() {
       //    测试接口返回的数据
-      this.$store.dispatch('search/getSearchList', {})
+      this.$store.dispatch('search/getSearchList', this.searchParams)
+    },
+    removeCategoryName() {
+      // 带给服务器的参数置空
+      // 带给服务器的字段是可有可无的，如果属性为空的字符串还是会把相应的字符串字段带给服务器
+      // 变为undefined 不会重新给服务器提交，增加性能
+      this.searchParams.categoryName = undefined;
+      this.searchParams.category1Id = undefined;
+      this.searchParams.category2Id = undefined;
+      this.searchParams.category3Id = undefined;
+      // 加载默认数据
+      this.getData();
+      //   地址栏也需要修改:进行路由的跳转,跳转到自己这里
+      //  本意删除params参数，
+      if (this.$route.params) {
+        this.$router.push({name: 'search', params: this.$route.params})
+      }
+    },
+    removeKeyword() {
+      this.searchParams.keyword = undefined;
+      //  再次发送请求
+      this.getData();
+      //  搜索框置空  通知兄弟组件Header清楚关键字
+      this.$bus.$emit('clear');
+      //  进行路由的跳转
+      if (this.$route.query) {
+        this.$router.push({name: 'search', query: this.$route.query});
+      }
+    },
+    // 自定义事件的回调
+    trademarkInfo(trademark) {
+      // console.log("wos父组件", trademark)
+      this.searchParams.trademark = `${trademark.tmId}:${trademark.tmName}`;
+      // 再次发送请求，获取serach模块数据
+      this.getData();
+    },
+    // 删除品牌的信息
+    removetradeMark() {
+      //将品牌信息置空
+      this.searchParams.trademark = undefined;
+      this.getData();
+    },
+    // 平台售卖属性自定义回调
+    attrInfo(attr, attrValue) {
+      // 父组件接收数据并发送请求
+      // console.log("aaa",attr)
+      //['属性ID':'属性值：属性名']
+      let props = `${attr.attrId}:${attrValue}:${attr.attrName}`;
+      // this.searchParams.props.push(props)
+      // 追加到数组中去
+      if (this.searchParams.props.indexOf(props) == -1) this.searchParams.props.push(props)
+      // 再次发送请求
+      this.getData();
+    },
+    // 删除售卖属性面包屑
+    removeAttr(index) {
+      // 再次整理参数
+      this.searchParams.props.splice(index, 1);
+      this.getData()
+    },
+    //   排序的操作
+    changeOrder(flag) {
+      // flag 标记用户点击的是谁（综合:1 or 价格:2）
+      // console.log(flag)
+      let originOrder = this.searchParams.order;//1:desc
+      // 获取最开始的状态 originFlag:1
+      let originFlag = this.searchParams.order.split(":")[0];
+      //
+      let originSort = this.searchParams.order.split(":")[1];
+      // console.log(originOrder,originSort)//1:desc desc
+      // 准备一个新的order属性值
+      let newOrder = '';// 新的排序方式
+      // 判断多次点击的是不是同一个按钮
+      if (flag == originFlag) {// 判断当前点击的是谁
+        newOrder = `${originFlag}:${originSort == "desc" ? "asc" : "desc"}`
+      } else {
+        //  点击的是价格
+        newOrder = `${flag}:${'desc'}`;
+      }
+      //  将新的order赋值给searchParams
+      this.searchParams.order = newOrder;
+      // 再次发送请求
+      this.getData()
+    },
+    getPageNo(pageNo) {
+      this.searchParams.pageNo = pageNo;
+      //  再次发送请求
+      this.getData()
     }
   },
   components: {
-    SearchSelector
+    SearchSelector,
+    Pagination
   },
   computed: {
     // mapGetters 里面的写法传递是数组，因为getters计算是没有划分模块的
-    ...mapGetters('search', ['goodsList'])
+    ...mapGetters('search', ['goodsList']),
+    //  判断是不是包含1，2高亮、排序
+    isOne() {
+      return this.searchParams.order.indexOf('1') != -1
+    },
+    isTwo() {
+      return this.searchParams.order.indexOf('2') != -1;
+    },
+    isAsc() {
+      return this.searchParams.order.indexOf('asc') != -1
+    },
+    isDesc() {
+      return this.searchParams.order.indexOf('desc') != -1
+    },
+    ...mapState({
+      // 获取数据
+      total: state => state.search.searchList.total
+    }),
+  },
+  // 数据监听：监听组件实例身上的属性的变化值
+  watch: {
+    // 监听属性
+    // 监听路由信息是否发生拜年话，如果发生变化，再次发送请求
+    $route(newValue, oldValue) {
+      // 再次发送请求之前整理带给服务器参数
+      Object.assign(this.searchParams, this.$route.query, this.$route.params);
+      // 再次发送请求
+      this.getData();
+      // 分类的名字与关键字不用清理
+      this.searchParams.category1Id = '';
+      this.searchParams.category2Id = '';
+      this.searchParams.category3Id = '';
+    }
   }
 }
 </script>
@@ -432,7 +539,7 @@ export default {
         width: 733px;
         height: 66px;
         overflow: hidden;
-        float: right;
+        margin: 10px auto;
 
         .sui-pagination {
           margin: 18px 0;

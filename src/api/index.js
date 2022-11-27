@@ -50,3 +50,14 @@ export const reqGetSearchInfo=(params)=>requests({
     method:"post",
     data:params
 })
+
+// 获取商品详情页数据获取
+export const reqGoodsInfo=(skuId)=>requests({
+    url:`/item/${skuId}`,
+    method:'get'
+})
+//将产品添加到购物车中 (获取更新某一个产品的个数)
+export const reqAddOrderUpdateShopCart=(skuId,skuNum)=>requests({
+    url:`/cart/addToCart/${ skuId }/${ skuNum }`,
+    method:'post'
+})

@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 // 引入小仓库
 import home from './home'
 import search from './search'
+import detail from "@/store/detail/detail";
 // 需要使用插件一次
 Vue.use(Vuex)
 
@@ -27,7 +28,8 @@ export default new Vuex.Store({
   modules:{
       // 注册小仓库模块
       home,
-      search
+      search,
+      detail,
     /*  state, // 状态
       mutations, // 包含多个更新state函数的对象
       actions, // 包含多个队形事件回调函数的对象

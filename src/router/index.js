@@ -1,11 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
+import routes from "@/router/routes";
 Vue.use(VueRouter)
-
-import Home from '@/pages/Home'
-import Login from '@/pages/Login'
-import Register from '@/pages/Register'
-import Search from '@/pages/Search'
 // 先把vueRouter原型对象上的push，replace先保存一份
 let originPush=VueRouter.prototype.push;
 let originReplace=VueRouter.prototype.replace;
@@ -35,51 +31,12 @@ VueRouter.prototype.replace=function (location,resolve,reject){
 }
 
 export default new VueRouter({
-    routes: [
-        {
-            path: '/home',
-            component: Home,
-            meta: {
-                isShow: true
-            }
-        },
-        {
-            path: '/login',
-            component: Login,
-            meta: {
-                isShow: false
-            }
-        },
-        {
-            path: '/register',
-            component: Register,
-            meta: {
-                isShow: false
-            },
-        },
-        {// 进行占位
-            // 可传可不传： 参数后面加上问号？ 代表params参数可传可不传
-            // 传递是空串解决：使用undefined解决 params 参数可以传递，不传递（空字符串）
-            path: '/search/:keyword?',
-            component: Search,
-            meta: {
-                isShow: true
-            },
-            name: 'search',
-            // 路由组件能不能传递props数据？能
-            // 1.布尔值写法 ：params:true 只能传递params参数
-            props: true,
-            // 2.对象写法 额外的给路由传递一些props
-            // props:{a:1,b:2}
-            // 函数式写法：可以params 参数，query参数，通过props传递给路由组件
-           /* props:($route)=>{
-                return {keyword:$route.params.keyword,k:$route.query.k}
-            }*/
-        },
-        {
-            path: '*',
-            redirect: '/home'
+    routes,
+    // 滚动行为
+    scrollBehavior(to,from,savadPosition){
+        return{
+            y:0
         }
-    ]
+    }
 });
 
