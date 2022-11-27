@@ -8,19 +8,15 @@ Vue.use(Vuex)
 
 // state 是仓库存储数据的地方
 export const state={ // 初始化状态 这里放置的状态可以被多个组件共享
-count:1
+
 }
 // mutation 是修改state的唯一手段
 export const mutations={
-ADD(state){
-    state.count++
-}
+
 }
 // action:处理actions可以书写自己的业务逻辑,不能修改state，也可以处理异步
 export const actions={
-add(commit){
-    commit("ADD")
-}
+
 }
 // getters ：理解为计算属性,用于简化仓库数据，让组件获取仓库更加方便
 export const getters={

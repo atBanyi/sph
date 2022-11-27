@@ -1,11 +1,12 @@
 // home模块的小仓库
-import {reqCategoryList, reqGetBannerList} from "@/api";
+import {reqCategoryList, reqGetBannerList,reqFloorList} from "@/api";
 // 获取首页轮播图的数据
 
 const state = {
     // state默认初始值不要乱写，与服务器返回值类型一致
     categoryList: [],
     bannerList: [],
+    floorList:[],
 };
 const mutations = {// 修改state里面的状态
     CATEGORYLIST(state, categoryList) {
@@ -15,6 +16,9 @@ const mutations = {// 修改state里面的状态
 //
     BANNERLIST(state, bannerList) {
         state.bannerList = bannerList
+    },
+    FLOORLIST(state,floorList){
+        state.floorList=floorList
     }
 };
 const actions = {
@@ -42,6 +46,15 @@ const actions = {
         console.log(result)
         if (result.code == 200) {// result.code==200 响应成功
             commit("BANNERLIST", result.data)
+        }
+    },
+
+//    获取floor数据
+    async getFloorList({commit,}) {
+        let result = await reqFloorList();
+        console.log(result)
+        if (result.code == 200) {// result.code==200 响应成功
+            commit("FLOORLIST", result.data)
         }
     }
 };
